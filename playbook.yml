@@ -1,4 +1,12 @@
 - hosts: all
+  gather_facts: no
+  vars:
+    nginx_port: 80
+    root_dir: /usr/share/nginx/html
+    users:
+      - jaime
+      - sansa
+      - robert
   tasks:
     - name: update cache
       ansible.builtin.apt:
@@ -13,21 +21,53 @@
       become: yes
 
     - name: copy html
-      ansible.builtin.copy:
+      ansible.builtin.template:
         src: files/index.html
-        dest: /usr/share/nginx/html/index.html
+        dest: "{{ root_dir }}/index.html"
       notify:
         - restart nginx
       become: yes
 
     - name: copy nginx cfg
-      ansible.builtin.copy:
+      ansible.builtin.template:
         src: files/nginx.conf
         dest: /etc/nginx/nginx.conf
       notify: 
         - restart nginx
       become: yes
+    
+    - name: create users
+      ansible.builtin.user:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ users }}"
+      tags: users
+      become: yes
 
+    - name: create git cfg
+      ansible.builtin.template:
+        src: files/.gitconfig
+        dest: "/home/{{ item }}/.gitconfig"
+      loop: "{{ users }}"
+      tags: users
+      become: yes
+
+    - name: ensures {{ item }}/.ssh dir exists
+      file: 
+        path: "/home/{{ item }}/.ssh"
+        state: directory
+      loop: "{{ users }}"
+      tags: users
+      become: yes
+
+    - name: load ssh keys
+      ansible.builtin.template:
+        src: files/id_rsa.pub
+        dest: "/home/{{ item }}/.ssh/authorized_keys"
+      loop: "{{ users }}"
+      tags: users
+      become: yes
+      
   handlers:
     - name: restart nginx
       ansible.builtin.service:
