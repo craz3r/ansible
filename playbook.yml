@@ -1,0 +1,36 @@
+- hosts: all
+  tasks:
+    - name: update cache
+      ansible.builtin.apt:
+        update_cache: yes
+      tags: update
+      become: yes
+
+    - name: install nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: latest
+      become: yes
+
+    - name: copy html
+      ansible.builtin.copy:
+        src: files/index.html
+        dest: /usr/share/nginx/html/index.html
+      notify:
+        - restart nginx
+      become: yes
+
+    - name: copy nginx cfg
+      ansible.builtin.copy:
+        src: files/nginx.conf
+        dest: /etc/nginx/nginx.conf
+      notify: 
+        - restart nginx
+      become: yes
+
+  handlers:
+    - name: restart nginx
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
+      become: yes
