@@ -1,0 +1,24 @@
+- name: install nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: latest
+  become: yes
+  tags: server
+
+- name: copy html
+  ansible.builtin.template:
+    src: ../templates/index.html.j2
+    dest: "{{ root_dir }}/index.html"
+  notify:
+    - restart nginx
+  become: yes
+  tags: server
+
+- name: copy nginx cfg
+  ansible.builtin.template:
+    src: ../files/nginx.conf
+    dest: /etc/nginx/nginx.conf
+  notify: 
+    - restart nginx
+  become: yes
+  tags: server

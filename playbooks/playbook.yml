@@ -1,0 +1,28 @@
+- hosts: first
+  vars:
+    nginx_port: 80
+    root_dir: /usr/share/nginx/html
+    users:
+      - jaime
+      - sansa
+      - robert
+    check_filter: "This is server {{ ansible_facts['hostname'] }}!"
+  tasks:
+    - name: update cache
+      ansible.builtin.apt:
+        update_cache: yes
+      tags: update
+      become: yes
+
+    - import_tasks: cowsay.yml
+
+    - import_tasks: nginx.yml
+    
+    - import_tasks: users.yml
+      
+  handlers:
+    - name: restart nginx
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
+      become: yes

@@ -1,0 +1,31 @@
+- name: create users
+  ansible.builtin.user:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ users }}"
+  tags: users
+  become: yes
+
+- name: create git cfg
+  ansible.builtin.template:
+    src: ../files/.gitconfig
+    dest: "/home/{{ item }}/.gitconfig"
+  loop: "{{ users }}"
+  tags: users
+  become: yes
+
+- name: ensures {{ item }}/.ssh dir exists
+  file: 
+    path: "/home/{{ item }}/.ssh"
+    state: directory
+  loop: "{{ users }}"
+  tags: users
+  become: yes
+
+- name: load ssh keys
+  ansible.builtin.template:
+    src: ../files/id_rsa.pub
+    dest: "/home/{{ item }}/.ssh/authorized_keys"
+  loop: "{{ users }}"
+  tags: users
+  become: yes

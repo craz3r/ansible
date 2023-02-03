@@ -1,0 +1,7 @@
+roles:
+  - name: geerlingguy.nodejs
+    nodejs_version: "16.x"
+  - name: geerlingguy.git
+
+collections:
+  - name: ansible.posix

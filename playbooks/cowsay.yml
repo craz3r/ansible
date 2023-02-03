@@ -1,0 +1,12 @@
+- name: install cowsay
+  ansible.builtin.apt:
+    name: cowsay
+    state: latest
+  become: yes
+  tags: cowsay
+
+- name: run cowsay
+  ansible.builtin.shell: /usr/games/cowsay "Hello from cowsay"
+  register: cowsay_result
+  become: yes
+  tags: cowsay
